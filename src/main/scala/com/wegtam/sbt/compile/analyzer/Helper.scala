@@ -17,6 +17,8 @@
 
 package com.wegtam.sbt.compile.analyzer
 
+import java.text.DecimalFormat
+
 import adt.{ ScalacPhase, ScalacPhaseName }
 import adt.ScalacPhaseName.{ Loader, Total }
 import adt.ScalacPhaseValue.ScalacPhaseValueLoader
@@ -24,6 +26,7 @@ import adt.ScalacPhaseValue.ScalacPhaseValueLoader
 /**
   * A few helper methods for the project.
   */
+@SuppressWarnings(Array("org.wartremover.warts.Any"))
 object Helper {
 
   /**
@@ -32,22 +35,19 @@ object Helper {
     *
     * @param r Sequence of phase information
     */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def print(r: Seq[ScalacPhase]): Unit = {
-    val phaseHeader = "ID\tTook (in ms)\tPhase"
-
-    println("\n\n============================================================")
+    println("\n\n===========================================")
     println("Overview of the single phases")
-    println("============================================================")
-    println(phaseHeader)
+    println("===========================================")
+    println("| %-3s | %-20s | %-10s |".format("ID", "Phase", "Took (ms)"))
     r.sortBy(_.id).drop(1).foreach { phase =>
-      println(s"${phase.id}\t${phase.took}ms\t${phase.name}")
+      println("| %-3d | %-20s | %-10d |".format(phase.id, phase.name, phase.took))
     }
 
-    println("\n\n============================================================")
+    println("\n\n====================================================")
     println("Overview of the single phases (ordered by used time)")
-    println("============================================================")
-    println(s"$phaseHeader\tpercentage (%)")
+    println("====================================================")
+    println("| %-3s | %-20s | %-10s | %-6s |".format("ID", "Phase", "Took (ms)", "%"))
     val sortedByTime = r.sortBy(_.id).drop(1).sortBy(_.took)(Ordering[Long].reverse)
     val totalTime: Long =
       sortedByTime.find(_.id == ScalacPhaseName.phaseId(Total).getOrElse(-1)).fold(0L)(t => t.took)
@@ -57,7 +57,13 @@ object Helper {
           BigDecimal(phase.took.toDouble / totalTime.toDouble * 100)
             .setScale(2, BigDecimal.RoundingMode.HALF_UP)
         else 0
-      println(s"${phase.id}\t${phase.took}ms\t${phase.name}\t$tookPercentage%")
+      println(
+        "| %-3d | %-20s | %-10d | %-6s |"
+          .format(phase.id,
+                  phase.name,
+                  phase.took,
+                  new DecimalFormat("#0.##").format(tookPercentage))
+      )
     }
 
   }
