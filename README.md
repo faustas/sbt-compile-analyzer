@@ -22,7 +22,7 @@ run absolute/path/to/data-file.txt
 
 or
 
-`sbt "runMain Analyzer absolute/path/to/data-file.txt"`
+`sbt "runMain com.wegtam.sbt.compile.analyzer.Analyzer absolute/path/to/data-file.txt"`
 
 ## Contribution policy ##
 

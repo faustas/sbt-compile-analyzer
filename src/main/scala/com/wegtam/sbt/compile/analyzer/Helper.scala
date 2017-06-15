@@ -17,8 +17,8 @@
 
 package com.wegtam.sbt.compile.analyzer
 
-import adt.ScalacPhase
-import adt.ScalacPhaseName.Loader
+import adt.{ ScalacPhase, ScalacPhaseName }
+import adt.ScalacPhaseName.{ Loader, Total }
 import adt.ScalacPhaseValue.ScalacPhaseValueLoader
 
 /**
@@ -32,7 +32,43 @@ object Helper {
     *
     * @param r Sequence of phase information
     */
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def print(r: Seq[ScalacPhase]): Unit = {
+    val phaseHeader = "ID\tTook (in ms)\tPhase"
+
+    println("\n\n============================================================")
+    println("Overview of the single phases")
+    println("============================================================")
+    println(phaseHeader)
+    r.sortBy(_.id).drop(1).foreach { phase =>
+      println(s"${phase.id}\t${phase.took}ms\t${phase.name}")
+    }
+
+    println("\n\n============================================================")
+    println("Overview of the single phases (ordered by used time)")
+    println("============================================================")
+    println(s"$phaseHeader\tpercentage (%)")
+    val sortedByTime = r.sortBy(_.id).drop(1).sortBy(_.took)(Ordering[Long].reverse)
+    val totalTime: Long =
+      sortedByTime.find(_.id == ScalacPhaseName.phaseId(Total).getOrElse(-1)).fold(0L)(t => t.took)
+    r.sortBy(_.id).drop(1).sortBy(_.took)(Ordering[Long].reverse).foreach { phase =>
+      val tookPercentage: BigDecimal =
+        if (phase.took > 0)
+          BigDecimal(phase.took.toDouble / totalTime.toDouble * 100)
+            .setScale(2, BigDecimal.RoundingMode.HALF_UP)
+        else 0
+      println(s"${phase.id}\t${phase.took}ms\t${phase.name}\t$tookPercentage%")
+    }
+
+  }
+
+  /**
+    * Helper function to print the information from the loader.
+    * Currently unused.
+    *
+    * @param r Sequence of phase information
+    */
+  private def printLoaderData(r: Seq[ScalacPhase]): Unit = {
     // Loader
     val loaderPhase = r.find(_.name == Loader)
     loaderPhase.fold(println(s"No data for ${Loader.toString}")) { loader =>
@@ -55,21 +91,6 @@ object Helper {
           case _ => ""
         }
     }
-
-    println("\n\n============================================================")
-    println("Overview of the single phases")
-    println("============================================================")
-    r.sortBy(_.id).drop(1).foreach { phase =>
-      println(s"${phase.id} ${phase.name} took ${phase.took}ms")
-    }
-
-    println("\n\n============================================================")
-    println("Overview of the single phases (ordered by time)")
-    println("============================================================")
-    r.sortBy(_.id).drop(1).sortBy(_.took)(Ordering[Long].reverse).foreach { phase =>
-      println(s"${phase.id} ${phase.name} took ${phase.took}ms")
-    }
-
   }
 
 }
