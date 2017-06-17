@@ -29,6 +29,7 @@ or
 The following two tables represent the result of this program to itself.
 
 <pre><code>
+
 ===========================================
 Overview of the single phases
 ===========================================
@@ -82,6 +83,7 @@ Overview of the single phases (ordered by used time)
 | 21  | CleanupPhase         | 17         | 0,28   |
 | 7   | ExtMethodsPhase      | 11         | 0,18   |
 | 3   | PackageObjectsPhase  | 0          | 0      |
+
 </code></pre>
 
 ## Contribution policy ##
