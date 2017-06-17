@@ -48,7 +48,8 @@ object Helper {
     println("Overview of the single phases (ordered by used time)")
     println("====================================================")
     println("| %-3s | %-20s | %-10s | %-6s |".format("ID", "Phase", "Took (ms)", "%"))
-    val sortedByTime = r.sortBy(_.id).drop(1).sortBy(_.took)(Ordering[Long].reverse)
+    val sortedByTime: Seq[ScalacPhase] =
+      r.sortBy(_.id).drop(1).sortBy(_.took)(Ordering[Long].reverse)
     val totalTime: Long =
       sortedByTime.find(_.id == ScalacPhaseName.phaseId(Total).getOrElse(-1)).fold(0L)(t => t.took)
     r.sortBy(_.id).drop(1).sortBy(_.took)(Ordering[Long].reverse).foreach { phase =>
@@ -76,7 +77,7 @@ object Helper {
     */
   private def printLoaderData(r: Seq[ScalacPhase]): Unit = {
     // Loader
-    val loaderPhase = r.find(_.name == Loader)
+    val loaderPhase: Option[ScalacPhase] = r.find(_.name == Loader)
     loaderPhase.fold(println(s"No data for ${Loader.toString}")) { loader =>
       println("============================================================")
       println(s"${Loader.toString} (ID: ${loader.id}) took ${loader.took}ms")
@@ -84,15 +85,17 @@ object Helper {
       println("\nSlowest loading times:")
       loader.values
         .sortBy {
-          case ScalacPhaseValueLoader(desc1, desc2, value, took) => took
-          case _                                                 => -1
+          case ScalacPhaseValueLoader(desc1: String, desc2: String, value: String, took: Long) =>
+            took
+          case _ => -1
         }(Ordering[Long].reverse)
         .takeWhile {
-          case ScalacPhaseValueLoader(desc1, desc2, value, took) => took > 10
-          case _                                                 => true
+          case ScalacPhaseValueLoader(desc1: String, desc2: String, value: String, took: Long) =>
+            took > 10
+          case _ => true
         }
         .foreach {
-          case ScalacPhaseValueLoader(desc1, desc2, value, took) =>
+          case ScalacPhaseValueLoader(desc1: String, desc2: String, value: String, took: Long) =>
             println(s"$desc1, $desc2, $value, ${took}ms")
           case _ => ""
         }

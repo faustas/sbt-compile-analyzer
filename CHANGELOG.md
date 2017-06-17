@@ -20,6 +20,11 @@ Please follow the listed conventions when editing this file:
 
 ## Unreleased
 
+## 2017-06-17
+
+- Added some more type annotations
+- Updated the example in the README
+
 ## 2017-06-15
 
 ### Added
