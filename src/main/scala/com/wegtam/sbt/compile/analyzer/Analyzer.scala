@@ -59,9 +59,9 @@ object Analyzer {
   def main(args: Array[String]): Unit = {
     // The provided filepath to the data file
     // Yes, there is no check for non-existence :-)
-    val fp = args(0)
+    val fp: String = args(0)
 
-    val phases = Analyzer(fp).analyze()
+    val phases: Seq[ScalacPhase] = Analyzer(fp).analyze()
     Helper.print(phases)
   }
 }
@@ -81,7 +81,7 @@ final case class Analyzer(filepath: String) {
     * @return Sequence of information for the single phases.
     */
   def analyze(): Seq[ScalacPhase] = {
-    val lines = readFile()
+    val lines: Seq[String] = readFile()
     phases(lines)
   }
 
@@ -96,11 +96,11 @@ final case class Analyzer(filepath: String) {
     // Loader
     val loaderValuesRegex: Regex = ".*\\[loaded (\\w+) (\\w+) (.*) in (\\d+)ms].*".r
     val lvr: Seq[ScalacPhaseValueLoader] = lines.flatMap {
-      case loaderValuesRegex(desc1, desc2, value, took) =>
+      case loaderValuesRegex(desc1: String, desc2: String, value: String, took: String) =>
         Option(ScalacPhaseValueLoader(desc1, desc2, value, took.toLong))
       case _ => None
     }
-    val loaderPhase = ScalacPhase(
+    val loaderPhase: ScalacPhase = ScalacPhase(
       ScalacPhaseName.phaseId(Loader).getOrElse(-1),
       Loader,
       -1L,
@@ -110,7 +110,7 @@ final case class Analyzer(filepath: String) {
     // load all phases
     val allPhasesRegex: Regex = ".*\\[(\\w+) in (\\d+)ms\\].*".r
     val phases: Seq[ScalacPhase] = lines.flatMap {
-      case allPhasesRegex(phase, took) =>
+      case allPhasesRegex(phase: String, took: String) =>
         ScalacPhaseName
           .valueOf(phase)
           .fold[Option[ScalacPhase]](None)(
